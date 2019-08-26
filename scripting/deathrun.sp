@@ -55,7 +55,7 @@ public void OnMapEnd()
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	/* game_player_equip entities will not be activated until players will trigger them */
-    if (StrEqual(classname, "game_player_equip"))
+	if (StrEqual(classname, "game_player_equip"))
 	{
 		SDKHook(entity, SDKHook_SpawnPost, OnGamePlayerEquipSpawn);
 	}
