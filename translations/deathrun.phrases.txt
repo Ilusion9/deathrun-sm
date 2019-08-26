@@ -1,0 +1,18 @@
+"Phrases"
+{
+	"Type Command"
+	{
+		"#format"		"{1:s}"
+		"en"			"Type \"{1}\" in console to become Terrorist."
+	}
+
+	"Queue At"
+	{
+		"en"			"You are already in the queue."
+	}
+	
+	"Queue In"
+	{
+		"en"			"You were added to the queue."
+	}
+}
