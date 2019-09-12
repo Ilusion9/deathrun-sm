@@ -18,7 +18,7 @@ public Plugin myinfo =
 ArrayList g_List_Queue;
 ConVar g_Cvar_RemoveWeapons;
 
-int g_iTerrorist;
+int g_Terrorist;
 
 public void OnPluginStart()
 {
@@ -40,7 +40,7 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	g_iTerrorist = 0;
+	g_Terrorist = 0;
 }
 
 public void OnMapEnd()
@@ -100,10 +100,10 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		return;
 	}
 		
-	if (g_iTerrorist)
+	if (g_Terrorist)
 	{
-		int client = GetClientOfUserId(g_iTerrorist);
-		g_iTerrorist = 0;
+		int client = GetClientOfUserId(g_Terrorist);
+		g_Terrorist = 0;
 		
 		if (client && IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_T) {
 			CS_SwitchTeam(client, CS_TEAM_CT);
@@ -112,8 +112,8 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 	
 	if (g_List_Queue.Length)
 	{
-		g_iTerrorist = g_List_Queue.Get(0);
-		int client = GetClientOfUserId(g_iTerrorist);
+		g_Terrorist = g_List_Queue.Get(0);
+		int client = GetClientOfUserId(g_Terrorist);
 		
 		if (client && IsClientInGame(client)) {
 			CS_SwitchTeam(client, CS_TEAM_T);
