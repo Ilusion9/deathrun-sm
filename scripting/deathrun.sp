@@ -34,7 +34,7 @@ public void OnPluginStart()
 	AddCommandListener(Command_Jointeam, "jointeam");
 	RegConsoleCmd("sm_queue", Command_Queue);
 	
-	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start.", 0, true, 0.0, true, 1.0);	
+	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start.", FCVAR_NONE, true, 0.0, true, 1.0);	
 	AutoExecConfig(false, "gamemode_deathrun");
 }
 
@@ -52,7 +52,8 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	/* game_player_equip entities will be deactivated until players will trigger them */
 
-	if (StrEqual(classname, "game_player_equip")) {
+	if (StrEqual(classname, "game_player_equip"))
+	{
 		SDKHook(entity, SDKHook_SpawnPost, OnGamePlayerEquipSpawn);
 	}
 }
@@ -61,7 +62,8 @@ public void OnGamePlayerEquipSpawn(int entity)
 {
 	int flags = GetEntProp(entity, Prop_Data, "m_spawnflags");
 
-	if (flags & 1) {
+	if (flags & 1)
+	{
 		return;
 	}
 
@@ -77,7 +79,8 @@ public void Frame_HandlePlayerConnect(any data)
 {
 	int client = GetClientOfUserId(view_as<int>(data));
 	
-	if (client) {
+	if (client)
+	{
 		ChangeClientTeam(client, CS_TEAM_CT);
 	}
 }
@@ -88,7 +91,8 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	{
 		int index = g_List_Queue.FindValue(event.GetInt("userid"));
 
-		if (index != -1) {
+		if (index != -1)
+		{
 			g_List_Queue.Erase(index);
 		}
 	}
@@ -96,7 +100,8 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 
 public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadcast)
 {	
-	if (GameRules_GetProp("m_bWarmupPeriod")) {
+	if (IsWarmupPeriod())
+	{
 		return;
 	}
 		
@@ -105,7 +110,8 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		int client = GetClientOfUserId(g_Terrorist);
 		g_Terrorist = 0;
 		
-		if (client && IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_T) {
+		if (client && IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_T)
+		{
 			CS_SwitchTeam(client, CS_TEAM_CT);
 		}
 	}
@@ -115,7 +121,8 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		g_Terrorist = g_List_Queue.Get(0);
 		int client = GetClientOfUserId(g_Terrorist);
 		
-		if (client && IsClientInGame(client)) {
+		if (client && IsClientInGame(client))
+		{
 			CS_SwitchTeam(client, CS_TEAM_T);
 		}
 	}
@@ -124,7 +131,8 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 	{
 		for (int i = 1; i <= MaxClients; i++)
 		{
-			if (IsClientInGame(i) && IsPlayerAlive(i)) {
+			if (IsClientInGame(i) && IsPlayerAlive(i))
+			{
 				RemovePlayerWeapons(i);
 			}
 		}
@@ -140,7 +148,8 @@ public Action Command_Jointeam(int client, const char[] command, int args)
 		char arg[3];
 		GetCmdArg(1, arg, sizeof(arg));
 		
-		if (StrEqual(arg, "1") || StrEqual(arg, "3")) {
+		if (StrEqual(arg, "1") || StrEqual(arg, "3"))
+		{
 			return Plugin_Continue;
 		}
 	}
@@ -170,11 +179,16 @@ public Action Command_Queue(int client, int args)
 	return Plugin_Handled;
 }
 
-stock void RemovePlayerWeapons(int client)
+bool IsWarmupPeriod()
+{
+	return view_as<bool>(GameRules_GetProp("m_bWarmupPeriod"));
+}
+
+void RemovePlayerWeapons(int client)
 {   
 	int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 	
-	for (int i= 0; i < length; i++) 
+	for (int i = 0; i < length; i++) 
 	{ 
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i); 
 
