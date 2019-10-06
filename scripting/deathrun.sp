@@ -18,7 +18,7 @@ public Plugin myinfo =
 ArrayList g_List_Queue;
 ConVar g_Cvar_RemoveWeapons;
 
-int g_Terrorist;
+int g_TerroristId;
 
 public void OnPluginStart()
 {
@@ -40,7 +40,7 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	g_Terrorist = 0;
+	g_TerroristId = 0;
 }
 
 public void OnMapEnd()
@@ -72,10 +72,10 @@ public void OnGamePlayerEquipSpawn(int entity)
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast) 
 {
-	RequestFrame(Frame_HandlePlayerConnect, event.GetInt("userid"));
+	RequestFrame(Frame_PlayerConnect, event.GetInt("userid"));
 }
 
-public void Frame_HandlePlayerConnect(any data)
+public void Frame_PlayerConnect(any data)
 {
 	int client = GetClientOfUserId(view_as<int>(data));
 	
@@ -104,11 +104,11 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 	{
 		return;
 	}
-		
-	if (g_Terrorist)
+	
+	if (g_TerroristId)
 	{
-		int client = GetClientOfUserId(g_Terrorist);
-		g_Terrorist = 0;
+		int client = GetClientOfUserId(g_TerroristId);
+		g_TerroristId = 0;
 		
 		if (client && IsClientInGame(client) && GetClientTeam(client) == CS_TEAM_T)
 		{
@@ -118,15 +118,15 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 	
 	if (g_List_Queue.Length)
 	{
-		g_Terrorist = g_List_Queue.Get(0);
-		int client = GetClientOfUserId(g_Terrorist);
+		g_TerroristId = g_List_Queue.Get(0);
+		int client = GetClientOfUserId(g_TerroristId);
 		
 		if (client && IsClientInGame(client))
 		{
 			CS_SwitchTeam(client, CS_TEAM_T);
 		}
 	}
-		
+	
 	if (g_Cvar_RemoveWeapons.BoolValue)
 	{
 		for (int i = 1; i <= MaxClients; i++)
@@ -138,7 +138,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		}
 	}
 	
-	PrintToChatAll(" \x04[DR]\x01 %t", "Type Command", "\x10!queue\x01");
+	PrintToChatAll(" \x04[DR]\x01 %t", "Type Command", "\x10sm_queue\x01");
 }
 
 public Action Command_Jointeam(int client, const char[] command, int args)
