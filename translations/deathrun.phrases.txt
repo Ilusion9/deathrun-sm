@@ -8,7 +8,7 @@
 
 	"Queue At"
 	{
-		"en"			"You are already in the queue."
+		"en"			"You are already in the queue!"
 	}
 	
 	"Queue In"
