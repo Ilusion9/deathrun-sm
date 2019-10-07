@@ -15,10 +15,11 @@ public Plugin myinfo =
     url = "https://github.com/Ilusion9/"
 };
 
-ArrayList g_List_Queue;
-ConVar g_Cvar_RemoveWeapons;
-
 int g_TerroristId;
+ArrayList g_List_Queue;
+
+ConVar g_Cvar_RemoveWeapons;
+ConVar g_Cvar_BotQuota;
 
 public void OnPluginStart()
 {
@@ -35,12 +36,33 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_queue", Command_Queue);
 	
 	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start.", FCVAR_NONE, true, 0.0, true, 1.0);	
+	g_Cvar_BotQuota = FindConVar("bot_quota");
+	g_Cvar_BotQuota.AddChangeHook(ConVarChange_BotQuota);
+	
 	AutoExecConfig(false, "gamemode_deathrun");
+}
+
+public void ConVarChange_BotQuota(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	/* Keep always one bot */
+	if (g_Cvar_BotQuota.IntValue != 1)
+	{
+		g_Cvar_BotQuota.SetInt(1);
+	}
 }
 
 public void OnMapStart()
 {
 	g_TerroristId = 0;
+}
+
+public void OnConfigsExecuted()
+{
+	g_Cvar_BotQuota.SetInt(1);
+	
+	SetConVar("bot_quota_mode", "normal");
+	SetConVar("bot_join_team", "t");
+	SetConVar("bot_join_after_player", "0");
 }
 
 public void OnMapEnd()
@@ -87,6 +109,7 @@ public void Frame_PlayerConnect(any data)
 
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast) 
 {
+	/* Remove players from queue if they are no longer CT (they moved to another team or left the server) */
 	if (event.GetInt("team") != CS_TEAM_CT)
 	{
 		int index = g_List_Queue.FindValue(event.GetInt("userid"));
@@ -177,6 +200,16 @@ public Action Command_Queue(int client, int args)
 	ReplyToCommand(client, "%s%t", GetCmdReplySource() != SM_REPLY_TO_CONSOLE ? " \x04[DR]\x01 " : "", "Added To Queue");
 	
 	return Plugin_Handled;
+}
+
+void SetConVar(const char[] name, const char[] value)
+{
+	ConVar convar = FindConVar(name);
+	
+	if (convar)
+	{
+		convar.SetString(value);
+	}
 }
 
 bool IsWarmupPeriod()
