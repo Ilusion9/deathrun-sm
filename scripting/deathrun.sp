@@ -1,18 +1,17 @@
-#pragma semicolon 1
-#pragma newdecls required
-
 #include <sourcemod>
 #include <cstrike>
 #include <sdkhooks>
 #include <sdktools>
 
+#pragma newdecls required
+
 public Plugin myinfo =
 {
-    name = "Deathrun Manager",
-    author = "Ilusion9",
-    description = "Deathrun gamemode with queue",
-    version = "2.5",
-    url = "https://github.com/Ilusion9/"
+	name = "Deathrun Manager",
+	author = "Ilusion9",
+	description = "Deathrun gamemode with queue",
+	version = "2.5",
+	url = "https://github.com/Ilusion9/"
 };
 
 int g_TerroristId;
