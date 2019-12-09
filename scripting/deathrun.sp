@@ -14,11 +14,12 @@ public Plugin myinfo =
 	url = "https://github.com/Ilusion9/"
 };
 
-int g_TerroristId;
 ArrayList g_List_Queue;
 
 ConVar g_Cvar_RemoveWeapons;
 ConVar g_Cvar_BotQuota;
+
+int g_TerroristId;
 
 public void OnPluginStart()
 {
@@ -43,7 +44,6 @@ public void OnPluginStart()
 
 public void ConVarChange_BotQuota(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	/* Keep always one bot */
 	if (g_Cvar_BotQuota.IntValue != 1)
 	{
 		g_Cvar_BotQuota.SetInt(1);
@@ -71,8 +71,6 @@ public void OnMapEnd()
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	/* game_player_equip entities will be deactivated until players will trigger them */
-
 	if (StrEqual(classname, "game_player_equip"))
 	{
 		SDKHook(entity, SDKHook_SpawnPost, OnGamePlayerEquipSpawn);
@@ -82,7 +80,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 public void OnGamePlayerEquipSpawn(int entity)
 {
 	int flags = GetEntProp(entity, Prop_Data, "m_spawnflags");
-
 	if (flags & 1)
 	{
 		return;
@@ -93,13 +90,13 @@ public void OnGamePlayerEquipSpawn(int entity)
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast) 
 {
+	/* Players will auto join CT */
 	RequestFrame(Frame_PlayerConnect, event.GetInt("userid"));
 }
 
 public void Frame_PlayerConnect(any data)
 {
 	int client = GetClientOfUserId(view_as<int>(data));
-	
 	if (client)
 	{
 		ChangeClientTeam(client, CS_TEAM_CT);
@@ -108,11 +105,12 @@ public void Frame_PlayerConnect(any data)
 
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast) 
 {
-	/* Remove players from queue if they are no longer CT (they moved to another team or left the server) */
-	if (event.GetInt("team") != CS_TEAM_CT)
+	int toTeam = event.GetInt("team");
+	int clientId = event.GetInt("userid");
+	
+	if (toTeam != CS_TEAM_CT)
 	{
-		int index = g_List_Queue.FindValue(event.GetInt("userid"));
-
+		int index = g_List_Queue.FindValue(clientId);
 		if (index != -1)
 		{
 			g_List_Queue.Erase(index);
@@ -164,7 +162,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 }
 
 public Action Command_Jointeam(int client, const char[] command, int args)
-{	
+{
 	if (client)
 	{
 		char arg[3];
@@ -188,15 +186,14 @@ public Action Command_Queue(int client, int args)
 	}
 	
 	int userId = GetClientUserId(client);
-	
 	if (g_List_Queue.FindValue(userId) != -1)
 	{
-		ReplyToCommand(client, "%s%t", GetCmdReplySource() != SM_REPLY_TO_CONSOLE ? " \x04[DR]\x01 " : "", "Already In Queue");
+		ReplyToCommand(client, "%s%t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01 " : "", "Already In Queue");
 		return Plugin_Handled;
 	}
 	
 	g_List_Queue.Push(userId);
-	ReplyToCommand(client, "%s%t", GetCmdReplySource() != SM_REPLY_TO_CONSOLE ? " \x04[DR]\x01 " : "", "Added To Queue");
+	ReplyToCommand(client, "%s%t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01 " : "", "Added To Queue");
 	
 	return Plugin_Handled;
 }
@@ -204,7 +201,6 @@ public Action Command_Queue(int client, int args)
 void SetConVar(const char[] name, const char[] value)
 {
 	ConVar convar = FindConVar(name);
-	
 	if (convar)
 	{
 		convar.SetString(value);
@@ -219,11 +215,9 @@ bool IsWarmupPeriod()
 void RemovePlayerWeapons(int client)
 {   
 	int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-	
 	for (int i = 0; i < length; i++) 
-	{ 
+	{
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i); 
-
 		if (weapon != -1)
 		{
 			RemovePlayerItem(client, weapon);
