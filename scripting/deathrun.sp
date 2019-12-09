@@ -90,7 +90,6 @@ public void OnGamePlayerEquipSpawn(int entity)
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast) 
 {
-	/* Players will auto join CT */
 	RequestFrame(Frame_PlayerConnect, event.GetInt("userid"));
 }
 
