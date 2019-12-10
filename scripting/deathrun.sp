@@ -36,7 +36,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_t", Command_RequestTerrorist);
 
 	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start?", FCVAR_NONE, true, 0.0, true, 1.0);
-	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_death_from_score", "1", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_deaths_from_score", "1", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	g_Cvar_BotQuota = FindConVar("bot_quota");
 	g_Cvar_BotQuota.AddChangeHook(ConVarChange_BotQuota);
