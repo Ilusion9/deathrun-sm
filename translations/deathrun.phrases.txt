@@ -1,18 +1,24 @@
 "Phrases"
 {
-	"Type Command"
+	"Already Requested to be Terrorist"
 	{
-		"#format"		"{1:s}"
-		"en"			"Type \"{1}\" in console to become Terrorist."
-	}
-
-	"Queue At"
-	{
-		"en"			"You are already in the queue!"
+		"en"			"You already requested to become Terrorist."
 	}
 	
-	"Queue In"
+	"Terrorist in Next Round"
 	{
-		"en"			"You were added to the queue."
+		"en"			"You will become Terrorist in the next round."
+	}
+	
+	"Terrorist in X Rounds"
+	{
+		"#format"		"{1:d}"
+		"en"			"You will become Terrorist in {1} rounds."
+	}
+	
+	"New Terrorist"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} is now the Terrorist."
 	}
 }
