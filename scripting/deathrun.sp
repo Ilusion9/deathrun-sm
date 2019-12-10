@@ -10,32 +10,34 @@ public Plugin myinfo =
 	name = "Deathrun Manager",
 	author = "Ilusion9",
 	description = "Deathrun gamemode with queue",
-	version = "2.5",
+	version = "2.6",
 	url = "https://github.com/Ilusion9/"
 };
 
 ArrayList g_List_Queue;
 
-ConVar g_Cvar_RemoveWeapons;
 ConVar g_Cvar_BotQuota;
+ConVar g_Cvar_RemoveWeapons;
+ConVar g_Cvar_IgnoreDeaths;
 
 int g_TerroristId;
 
 public void OnPluginStart()
 {
 	g_List_Queue = new ArrayList();	
-	
-	LoadTranslations("common.phrases");
 	LoadTranslations("deathrun.phrases");
 
 	HookEvent("player_connect_full", Event_PlayerConnect);
 	HookEvent("player_team", Event_PlayerTeam);
+	HookEvent("player_death", Event_PlayerDeath);
 	HookEvent("round_prestart", Event_RoundPreStart);
 	
-	AddCommandListener(Command_Jointeam, "jointeam");
-	RegConsoleCmd("sm_queue", Command_Queue);
-	
-	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start.", FCVAR_NONE, true, 0.0, true, 1.0);	
+	AddCommandListener(Command_JoinTeam, "jointeam");
+	RegConsoleCmd("sm_t", Command_RequestTerrorist);
+
+	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start?", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_death_from_score", "1", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
+
 	g_Cvar_BotQuota = FindConVar("bot_quota");
 	g_Cvar_BotQuota.AddChangeHook(ConVarChange_BotQuota);
 	
@@ -105,14 +107,33 @@ public void Frame_PlayerConnect(any data)
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast) 
 {
 	int toTeam = event.GetInt("team");
-	int clientId = event.GetInt("userid");
+	int userId = event.GetInt("userid");
 	
 	if (toTeam != CS_TEAM_CT)
 	{
-		int index = g_List_Queue.FindValue(clientId);
-		if (index != -1)
+		int posQueue = g_List_Queue.FindValue(userId);
+		if (posQueue != -1)
 		{
-			g_List_Queue.Erase(index);
+			g_List_Queue.Erase(posQueue);
+		}
+	}
+}
+
+public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast) 
+{
+	if (g_Cvar_IgnoreDeaths.BoolValue)
+	{
+		if (event.GetInt("attacker") == 0)
+		{
+			int client = GetClientOfUserId(event.GetInt("userid"));
+			if (client)
+			{
+				int frags = GetClientFrags(client) + 1;
+				SetEntProp(client, Prop_Data, "m_iFrags", frags);
+
+				int deaths = GetClientDeaths(client) - 1;
+				SetEntProp(client, Prop_Data, "m_iDeaths", deaths);
+			}
 		}
 	}
 }
@@ -138,11 +159,34 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 	if (g_List_Queue.Length)
 	{
 		g_TerroristId = g_List_Queue.Get(0);
-		int client = GetClientOfUserId(g_TerroristId);
+		g_List_Queue.Erase(0);
 		
+		int client = GetClientOfUserId(g_TerroristId);
 		if (client && IsClientInGame(client))
 		{
+			char clientName[MAX_NAME_LENGTH];
+			GetClientName(client, clientName, sizeof(clientName));
+			
+			PrintToChatAll(" \x04[DR]\x01 %t", "New Terrorist", clientName);
 			CS_SwitchTeam(client, CS_TEAM_T);
+		}
+	}
+	
+	if (g_List_Queue.Length)
+	{
+		int client = GetClientOfUserId(g_List_Queue.Get(0));
+		if (client)
+		{
+			PrintToChat(client, " \x04[DR]\x01 %t", "Terrorist in Next Round");
+		}
+		
+		for (int i = 1; i < g_List_Queue.Length; i++)
+		{
+			client = GetClientOfUserId(g_List_Queue.Get(i));
+			if (client)
+			{
+				PrintToChat(client, " \x04[DR]\x01 %t", "Terrorist in X Rounds", i + 1);
+			}
 		}
 	}
 	
@@ -155,44 +199,54 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 				RemovePlayerWeapons(i);
 			}
 		}
-	}
-	
-	PrintToChatAll(" \x04[DR]\x01 %t", "Type Command", "\x10sm_queue\x01");
+	}	
 }
 
-public Action Command_Jointeam(int client, const char[] command, int args)
+public Action Command_JoinTeam(int client, const char[] command, int args)
 {
-	if (client)
+	if (!client)
 	{
-		char arg[3];
-		GetCmdArg(1, arg, sizeof(arg));
-		
-		if (StrEqual(arg, "1") || StrEqual(arg, "3"))
-		{
-			return Plugin_Continue;
-		}
+		return Plugin_Handled;
+	}
+	
+	char arg[3];
+	GetCmdArg(1, arg, sizeof(arg));
+	
+	if (StrEqual(arg, "1") || StrEqual(arg, "3"))
+	{
+		return Plugin_Continue;
 	}
 	
 	return Plugin_Handled;
 }
 
-public Action Command_Queue(int client, int args)
-{	
+public Action Command_RequestTerrorist(int client, int args)
+{
 	if (!client)
 	{
-		ReplyToCommand(client, "[SM] %t", "Command is in-game only");
 		return Plugin_Handled;
 	}
 	
 	int userId = GetClientUserId(client);
-	if (g_List_Queue.FindValue(userId) != -1)
+	int posQueue = g_List_Queue.FindValue(userId);
+	
+	if (posQueue != -1)
 	{
-		ReplyToCommand(client, "%s%t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01 " : "", "Already In Queue");
-		return Plugin_Handled;
+		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Already Requested to be Terrorist");
+	}
+	else
+	{
+		posQueue = g_List_Queue.Push(userId);
 	}
 	
-	g_List_Queue.Push(userId);
-	ReplyToCommand(client, "%s%t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01 " : "", "Added To Queue");
+	if (posQueue)
+	{
+		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Terrorist in X Rounds", posQueue + 1);
+	}
+	else
+	{
+		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Terrorist in Next Round");
+	}
 	
 	return Plugin_Handled;
 }
