@@ -36,7 +36,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_t", Command_RequestTerrorist);
 
 	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start?", FCVAR_NONE, true, 0.0, true, 1.0);
-	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_deaths_from_score", "1", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_deaths_from_score", "0", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	g_Cvar_BotQuota = FindConVar("bot_quota");
 	g_Cvar_BotQuota.AddChangeHook(ConVarChange_BotQuota);
@@ -121,16 +121,16 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast) 
 {
-	if (g_Cvar_IgnoreDeaths.BoolValue)
+	if (event.GetInt("attacker") == 0)
 	{
-		if (event.GetInt("attacker") == 0)
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		if (client)
 		{
-			int client = GetClientOfUserId(event.GetInt("userid"));
-			if (client)
-			{
-				int frags = GetClientFrags(client) + 1;
-				SetEntProp(client, Prop_Data, "m_iFrags", frags);
+			int frags = GetClientFrags(client) + 1;
+			SetEntProp(client, Prop_Data, "m_iFrags", frags);
 
+			if (g_Cvar_IgnoreDeaths.BoolValue)
+			{
 				int deaths = GetClientDeaths(client) - 1;
 				SetEntProp(client, Prop_Data, "m_iDeaths", deaths);
 			}
