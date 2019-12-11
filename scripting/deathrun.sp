@@ -29,6 +29,7 @@ public void OnPluginStart()
 
 	HookEvent("player_connect_full", Event_PlayerConnect);
 	HookEvent("player_team", Event_PlayerTeam);
+	HookEvent("player_death", Event_PlayerDeath_Pre, EventHookMode_Pre);
 	HookEvent("player_death", Event_PlayerDeath);
 	HookEvent("round_prestart", Event_RoundPreStart);
 	
@@ -36,6 +37,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_t", Command_RequestTerrorist);
 	RegConsoleCmd("sm_terro", Command_RequestTerrorist);
 	RegConsoleCmd("sm_terrorist", Command_RequestTerrorist);
+	RegConsoleCmd("sm_joint", Command_RequestTerrorist);
 
 	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start?", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_deaths_from_score", "0", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
@@ -117,6 +119,17 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 		if (posQueue != -1)
 		{
 			g_List_Queue.Erase(posQueue);
+		}
+	}
+}
+
+public void Event_PlayerDeath_Pre(Event event, const char[] name, bool dontBroadcast) 
+{
+	if (IsWarmupPeriod())
+	{
+		if (event.GetInt("attacker") == 0)
+		{
+			event.BroadcastDisabled = true;
 		}
 	}
 }
