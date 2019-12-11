@@ -34,6 +34,9 @@ public void OnPluginStart()
 	
 	AddCommandListener(Command_JoinTeam, "jointeam");
 	RegConsoleCmd("sm_t", Command_RequestTerrorist);
+	RegConsoleCmd("sm_terro", Command_RequestTerrorist);
+	RegConsoleCmd("sm_terrorist", Command_RequestTerrorist);
+	RegConsoleCmd("sm_joint", Command_RequestTerrorist);
 
 	g_Cvar_RemoveWeapons = CreateConVar("dr_remove_weapons_round_start", "1", "Remove all players weapons on round start?", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_Cvar_IgnoreDeaths = CreateConVar("dr_ignore_world_deaths_from_score", "0", "Ignore deaths made by world (traps) from players score?", FCVAR_NONE, true, 0.0, true, 1.0);
