@@ -6,8 +6,9 @@ https://forums.alliedmods.net/showthread.php?p=2610197
 
 # Commands
 ```
-sm_t (console)
-!t or /t (chat)
+sm_t
+sm_terro
+sm_terrorist
 ```
 # ConVars
 ```
