@@ -12,5 +12,5 @@ sm_t (console)
 # ConVars
 ```
 dr_remove_weapons_round_start 1 // Remove all players weapons on round start?
-dr_ignore_world_deaths_from_score 1 // Ignore deaths made by world (traps) from players score?
+dr_ignore_world_deaths_from_score 0 // Ignore deaths made by world (traps) from players score?
 ```
