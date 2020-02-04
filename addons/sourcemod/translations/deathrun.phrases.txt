@@ -1,0 +1,24 @@
+"Phrases"
+{
+	"Already Requested to be Terrorist"
+	{
+		"en"			"You already requested to become Terrorist."
+	}
+	
+	"Terrorist in Next Round"
+	{
+		"en"			"You will become Terrorist in the next round."
+	}
+	
+	"Terrorist in X Rounds"
+	{
+		"#format"		"{1:d}"
+		"en"			"You will become Terrorist in {1} rounds."
+	}
+	
+	"New Terrorist"
+	{
+		"#format"		"{1:s}"
+		"en"			"{1} is now the Terrorist."
+	}
+}
