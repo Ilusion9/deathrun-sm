@@ -44,7 +44,7 @@ public void OnPluginStart()
 	g_Cvar_BotQuota = FindConVar("bot_quota");
 	g_Cvar_BotQuota.AddChangeHook(ConVarChange_BotQuota);
 	
-	AutoExecConfig(false, "gamemode_deathrun");
+	AutoExecConfig(true, "deathrun");
 }
 
 public void ConVarChange_BotQuota(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -63,6 +63,7 @@ public void OnMapStart()
 public void OnConfigsExecuted()
 {
 	g_Cvar_BotQuota.SetInt(1);
+	ServerCommand("exec gamemode_deathrun");
 	
 	SetConVar("bot_quota_mode", "normal");
 	SetConVar("bot_join_team", "t");
@@ -95,10 +96,17 @@ public void OnGamePlayerEquipSpawn(int entity)
 
 public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadcast) 
 {
-	RequestFrame(Frame_PlayerConnect, event.GetInt("userid"));
+	int userId = event.GetInt("userid");
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	
+	if (client)
+	{
+		SetEntPropFloat(client, Prop_Send, "m_fForceTeam", 3600.0);
+		CreateTimer(1.5, Timer_PlayerConnect, userId);
+	}
 }
 
-public void Frame_PlayerConnect(any data)
+public Action Timer_PlayerConnect(Handle timer, any data)
 {
 	int client = GetClientOfUserId(view_as<int>(data));
 	if (client)
