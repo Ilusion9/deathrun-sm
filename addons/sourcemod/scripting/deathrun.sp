@@ -2,7 +2,7 @@
 #include <cstrike>
 #include <sdkhooks>
 #include <sdktools>
-
+#include <colorlib>
 #pragma newdecls required
 
 public Plugin myinfo =
@@ -98,12 +98,13 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
 {
 	int userId = event.GetInt("userid");
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	
-	if (client)
+	if (!client)
 	{
-		SetEntPropFloat(client, Prop_Send, "m_fForceTeam", 3600.0);
-		CreateTimer(1.5, Timer_PlayerConnect, userId);
+		return;
 	}
+	
+	SetEntPropFloat(client, Prop_Send, "m_fForceTeam", 3600.0);
+	CreateTimer(1.5, Timer_PlayerConnect, userId);
 }
 
 public Action Timer_PlayerConnect(Handle timer, any data)
@@ -134,7 +135,7 @@ public void Event_PlayerDeath_Pre(Event event, const char[] name, bool dontBroad
 {
 	if (IsWarmupPeriod())
 	{
-		if (event.GetInt("attacker") == 0)
+		if (!event.GetInt("attacker"))
 		{
 			event.BroadcastDisabled = true;
 		}
@@ -143,7 +144,7 @@ public void Event_PlayerDeath_Pre(Event event, const char[] name, bool dontBroad
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast) 
 {
-	if (event.GetInt("attacker") == 0)
+	if (!event.GetInt("attacker"))
 	{
 		int client = GetClientOfUserId(event.GetInt("userid"));
 		if (client)
@@ -189,8 +190,8 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 			char clientName[MAX_NAME_LENGTH];
 			GetClientName(client, clientName, sizeof(clientName));
 			
-			PrintToChatAll(" \x04[DR]\x01 %t", "New Terrorist", clientName);
 			CS_SwitchTeam(client, CS_TEAM_T);
+			CPrintToChatAll("{green}[DR]{default} %t", "New Terrorist", clientName);
 		}
 	}
 	
@@ -199,7 +200,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		int client = GetClientOfUserId(g_List_Queue.Get(0));
 		if (client)
 		{
-			PrintToChat(client, " \x04[DR]\x01 %t", "Terrorist in Next Round");
+			CPrintToChat(client, "{green}[DR]{default} %t", "Terrorist in Next Round");
 		}
 		
 		for (int i = 1; i < g_List_Queue.Length; i++)
@@ -207,7 +208,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 			client = GetClientOfUserId(g_List_Queue.Get(i));
 			if (client)
 			{
-				PrintToChat(client, " \x04[DR]\x01 %t", "Terrorist in X Rounds", i + 1);
+				CPrintToChat(client, "{green}[DR]{default} %t", "Terrorist in X Rounds", i + 1);
 			}
 		}
 	}
@@ -254,7 +255,7 @@ public Action Command_RequestTerrorist(int client, int args)
 	
 	if (posQueue != -1)
 	{
-		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Already Requested to be Terrorist");
+		CReplyToCommand(client, "{green}[DR]{default} %t", "Already Requested to be Terrorist");
 	}
 	else
 	{
@@ -263,11 +264,11 @@ public Action Command_RequestTerrorist(int client, int args)
 	
 	if (posQueue)
 	{
-		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Terrorist in X Rounds", posQueue + 1);
+		CReplyToCommand(client, "{green}[DR]{default} %t", "Terrorist in X Rounds", posQueue + 1);
 	}
 	else
 	{
-		ReplyToCommand(client, "%s %t", GetCmdReplySource() == SM_REPLY_TO_CHAT ? " \x04[DR]\x01" : "[DR]", "Terrorist in Next Round");
+		CReplyToCommand(client, "{green}[DR]{default} %t", "Terrorist in Next Round");
 	}
 	
 	return Plugin_Handled;
