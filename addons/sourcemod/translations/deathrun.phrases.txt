@@ -19,6 +19,6 @@
 	"New Terrorist"
 	{
 		"#format"		"{1:s}"
-		"en"			"{1} is now the Terrorist."
+		"en"			"{orange}{1}{default} is now the Terrorist."
 	}
 }
