@@ -104,16 +104,22 @@ public void Event_PlayerConnect(Event event, const char[] name, bool dontBroadca
 	}
 	
 	SetEntPropFloat(client, Prop_Send, "m_fForceTeam", 3600.0);
-	CreateTimer(1.5, Timer_PlayerConnect, userId);
+	CreateTimer(2.0, Timer_PlayerConnect, userId, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public Action Timer_PlayerConnect(Handle timer, any data)
 {
 	int client = GetClientOfUserId(view_as<int>(data));
-	if (client)
+	if (!client || !IsClientInGame(client))
+	{
+		return Plugin_Stop;
+	}
+	
+	if (GetClientTeam(client) != CS_TEAM_CT)
 	{
 		ChangeClientTeam(client, CS_TEAM_CT);
 	}
+	return Plugin_Stop;
 }
 
 public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast) 
