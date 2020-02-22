@@ -2,7 +2,7 @@
 #include <cstrike>
 #include <sdkhooks>
 #include <sdktools>
-#include <colorlib>
+#include <colorlib_sample>
 #pragma newdecls required
 
 public Plugin myinfo =
@@ -119,6 +119,7 @@ public Action Timer_PlayerConnect(Handle timer, any data)
 	{
 		ChangeClientTeam(client, CS_TEAM_CT);
 	}
+	
 	return Plugin_Stop;
 }
 
@@ -197,7 +198,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 			GetClientName(client, clientName, sizeof(clientName));
 			
 			CS_SwitchTeam(client, CS_TEAM_T);
-			CPrintToChatAll("{green}[DR]{default} %t", "New Terrorist", clientName);
+			CPrintToChatAll("\x04[DR]\x01 %t", "New Terrorist", clientName);
 		}
 	}
 	
@@ -206,7 +207,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 		int client = GetClientOfUserId(g_List_Queue.Get(0));
 		if (client)
 		{
-			CPrintToChat(client, "{green}[DR]{default} %t", "Terrorist in Next Round");
+			CPrintToChat(client, "\x04[DR]\x01 %t", "Terrorist in Next Round");
 		}
 		
 		for (int i = 1; i < g_List_Queue.Length; i++)
@@ -214,7 +215,7 @@ public void Event_RoundPreStart(Event event, const char[] name, bool dontBroadca
 			client = GetClientOfUserId(g_List_Queue.Get(i));
 			if (client)
 			{
-				CPrintToChat(client, "{green}[DR]{default} %t", "Terrorist in X Rounds", i + 1);
+				CPrintToChat(client, "\x04[DR]\x01 %t", "Terrorist in X Rounds", i + 1);
 			}
 		}
 	}
@@ -261,7 +262,7 @@ public Action Command_RequestTerrorist(int client, int args)
 	
 	if (posQueue != -1)
 	{
-		CReplyToCommand(client, "{green}[DR]{default} %t", "Already Requested to be Terrorist");
+		CReplyToCommand(client, "\x04[DR]\x01 %t", "Already Requested to be Terrorist");
 	}
 	else
 	{
@@ -270,11 +271,11 @@ public Action Command_RequestTerrorist(int client, int args)
 	
 	if (posQueue)
 	{
-		CReplyToCommand(client, "{green}[DR]{default} %t", "Terrorist in X Rounds", posQueue + 1);
+		CReplyToCommand(client, "\x04[DR]\x01 %t", "Terrorist in X Rounds", posQueue + 1);
 	}
 	else
 	{
-		CReplyToCommand(client, "{green}[DR]{default} %t", "Terrorist in Next Round");
+		CReplyToCommand(client, "\x04[DR]\x01 %t", "Terrorist in Next Round");
 	}
 	
 	return Plugin_Handled;
