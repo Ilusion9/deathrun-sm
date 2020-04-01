@@ -2,7 +2,7 @@
 #include <cstrike>
 #include <sdkhooks>
 #include <sdktools>
-#include <colorlib_sample>
+#include <sourcecolors>
 #pragma newdecls required
 
 public Plugin myinfo =
