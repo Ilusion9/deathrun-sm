@@ -1,6 +1,9 @@
 # Description
 Deathrun gamemode with queue for CS:GO.
 
+# Dependencies
+- Sourcecolors (include file) - https://github.com/Ilusion9/sourcecolors-inc-sm
+
 # Alliedmods
 https://forums.alliedmods.net/showthread.php?p=2610197
 
