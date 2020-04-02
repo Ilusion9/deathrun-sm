@@ -63,7 +63,7 @@ public void OnMapStart()
 public void OnConfigsExecuted()
 {
 	g_Cvar_BotQuota.SetInt(1);
-	ServerCommand("exec gamemode_deathrun");
+	ServerCommand("exec \"gamemode_deathrun.cfg\"");
 	
 	SetConVar("bot_quota_mode", "normal");
 	SetConVar("bot_join_team", "t");
